@@ -11,11 +11,13 @@ def scrape_page(url):
     bio = page.xpath("//div[@class='biotab bio']")[0].text_content()
     ret['bio'] = bio
     # grab contact info
-    # grab committees
     email = page.xpath(
         "//a[contains(@href, 'mailto:')]"
     )[0].attrib['href'].strip()[len("mailto:"):]
     ret['email'] = email
+    committees = page.xpath("//ul[@class='list-flat']//li")
+    ret['committees'] = [x.text for x in committees]
+
     return ret
 
 
@@ -35,7 +37,7 @@ def scrape_people():
             page = page[0].attrib['href']
             scraped_info = scrape_page(page)
 
-        print who, role, img, info
+        print who, role, img, info, scraped_info
 
         # Person(who,
         #        district=info['district'],
