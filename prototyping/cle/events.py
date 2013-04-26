@@ -2,11 +2,13 @@ import urllib2
 import urllib
 
 from util import lxmlize
+import datetime as dt
 import lxml
 import re
 
 
 CLICK_INFO = re.compile(r"CityCouncil\.popOverURL\('(?P<info_id>\d+)'\);")
+ORD_INFO = re.compile(r"Ord\. No\. (?P<ord_no>\d+-\d+)")
 AJAX_ENDPOINT = "http://www.clevelandcitycouncil.org/plugins/NewsToolv7/public/calendarPopup.ashx"
 
 
@@ -34,8 +36,24 @@ def scrape_events():
         poid = po.groupdict()['info_id']  # This is used to get more deetz on
 
         popage = popOverUrl(poid)
-        when = popage.xpath("//strong")[0].text
+        when = dt.datetime.strptime(popage.xpath("//strong")[0].text,
+                                    "%B %d, %Y @ %I:%M %p")
         who = popage.xpath("//h1")[0].text
+        related = []
+
+        for item in popage.xpath("//div"):
+            t = item.text
+            if t is None:
+                continue
+
+            t = t.strip()
+            for related_entity in ORD_INFO.findall(t):
+                related.append({
+                    "ord_no": related_entity,
+                    "what": t
+                })
+
+        print who, when, related
 
 
 if __name__ == "__main__":
