@@ -10,14 +10,18 @@ def scrape_page(url):
     page = lxmlize(url)
     bio = page.xpath("//div[@class='biotab bio']")[0].text_content()
     ret['bio'] = bio
-    # grab contact info
     email = page.xpath(
         "//a[contains(@href, 'mailto:')]"
     )[0].attrib['href'].strip()[len("mailto:"):]
     ret['email'] = email
     committees = page.xpath("//ul[@class='list-flat']//li")
     ret['committees'] = [x.text for x in committees]
+    contact = page.xpath("//div[@class='sidebar-content']//p")[0]
 
+    contact_details = dict([y.strip().split(":", 1) for y in [contact.text]
+                            + [x.tail for x in contact.xpath(".//br")] if y
+                            and ":" in y])
+    ret['contact_details'] = contact_details
     return ret
 
 
@@ -44,8 +48,11 @@ def scrape_people():
         #        gender=info['gender'].
         #        image=img)
         #
+        # person.add_committee_membership(what) for what in committees
         # yield person
         # Membership(person.id, self.org.id, role=role)
+        #   --> Add contact_details
+        #
         # yield membership
 
 
