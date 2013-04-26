@@ -6,10 +6,7 @@ import lxml
 import re
 
 
-# 9:30 AM Health and Human Services Committee
-EVENT_INFO = re.compile(r"(?P<when>\d+:\d+ (AM|PM)) (?P<ctty>.*) Committee")
 CLICK_INFO = re.compile(r"CityCouncil\.popOverURL\('(?P<info_id>\d+)'\);")
-
 AJAX_ENDPOINT = "http://www.clevelandcitycouncil.org/plugins/NewsToolv7/public/calendarPopup.ashx"
 
 
@@ -37,12 +34,8 @@ def scrape_events():
         poid = po.groupdict()['info_id']  # This is used to get more deetz on
 
         popage = popOverUrl(poid)
-        print popage.text_content()
-
-        e = EVENT_INFO.match(string)
-        if e is None:
-            continue
-        e = e.groupdict()
+        when = popage.xpath("//strong")[0].text
+        who = popage.xpath("//h1")[0].text
 
 
 if __name__ == "__main__":
