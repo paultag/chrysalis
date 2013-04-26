@@ -41,12 +41,11 @@ def scrape_people():
             page = page[0].attrib['href']
             scraped_info = scrape_page(page)
 
-        print who, role, img, info, scraped_info
-
         # Person(who,
         #        district=info['district'],
-        #        gender=info['gender'].
-        #        image=img)
+        #        gender=info['gender'],
+        #        image=img,
+        #        bio=contact-details.bio)
         #
         # person.add_committee_membership(what) for what in committees
         # yield person
