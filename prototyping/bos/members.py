@@ -2,6 +2,7 @@ from util import lxmlize
 
 
 MEMBER_LIST = "http://www.cityofboston.gov/citycouncil/"
+COMMITTEE_LIST = "http://www.cityofboston.gov/citycouncil/committees/"
 
 
 def get_one(page, expr):
@@ -52,5 +53,19 @@ def scrape_people():
         # yield p
         print name, homepage
 
+
+def scrape_committee_page(href):
+    page = lxmlize(href)
+
+
+def scrape_committees():
+    page = lxmlize(COMMITTEE_LIST)
+    committees = page.xpath("//a[contains(@href, 'committee')]")
+    for c in committees:
+        if c.text is None:
+            continue
+        scrape_committee_page(c.attrib['href'])
+
 if __name__ == "__main__":
-    scrape_people()
+    # scrape_people()
+    scrape_committees()
