@@ -1,3 +1,4 @@
+from collections import defaultdict
 from util import lxmlize
 
 
@@ -56,16 +57,85 @@ def scrape_people():
 
 def scrape_committee_page(href):
     page = lxmlize(href)
+    main = get_one(page, "//div[@class='content_main_sub']")
+    things = main.xpath("./*")
+    cur = None
+
+    split = {
+        "chair": None,
+        "email": None,
+        "liaison": ",",
+        "members": ",",
+        "vice-chair": None,
+        "description": None,
+    }
+
+    flags = {
+        "Committee Chair:": "chair",
+        "Committee E-mail:": "email",
+        "Committee Members:": "members",
+        "Committee Liaison:": "liaison",
+        "Committee Liaison(s):": "liaison",
+        "Committee Vice Chair": "vice-chair",
+        "Committee Vice Chair:": "vice-chair",
+        "Committee Description:": "description",
+    }
+
+    ret = defaultdict(list)
+    for entry in things:
+        if entry.tag == "h4":
+            cur = flags[entry.text.strip()]
+            continue
+
+        e = entry.text_content()
+        if e == "":
+            continue
+
+        if split[cur]:
+            e = [x.strip() for x in e.split(split[cur])]
+        else:
+            e = [e]
+
+        ret[cur] += e
+
+    return ret
 
 
 def scrape_committees():
     page = lxmlize(COMMITTEE_LIST)
-    committees = page.xpath("//a[contains(@href, 'committee')]")
+    committees = page.xpath(
+        "//a[contains(@href, 'committee') and contains(@href, 'asp')]")
     for c in committees:
         if c.text is None:
             continue
-        scrape_committee_page(c.attrib['href'])
+        name = c.text
+        info = scrape_committee_page(c.attrib['href'])
+        # committee = Committee(name)
+        print name
+        for member in info['members']:
+            # committee.add_member(member, role='member')
+            print member
+
+        chair = info.get('chair', None)
+        if chair:
+            chair = chair[0]
+            # committee.add_member(chair, role='chair')
+            print "CHAIR:", chair
+
+        vchair = info.get('vice-chair', None)
+        if vchair:
+            vchair = vchair[0]
+            # committee.add_member(vchair, role='vice-chair')
+            print "VICE-CHAIR:", vchair
+
+        email = info.get('email', None)
+        if email:
+            email = email[0]
+            # committee.add_contact_detail(email, 'committee email', 'email')
+            print "EMAIL:", email
+        # yield committee
+        print ""
 
 if __name__ == "__main__":
-    # scrape_people()
+    scrape_people()
     scrape_committees()
