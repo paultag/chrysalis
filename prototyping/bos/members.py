@@ -13,7 +13,15 @@ def get_one(page, expr):
 
 
 def scrape_page(href):
-    pass
+    page = lxmlize(href)
+    ret = {}
+    ret['bio'] = page.xpath(
+        "//div[@class='content_main_sub']")[0].text_content().strip()
+
+    ret['image'] = page.xpath(
+        "//div[@class='sub_main_hd']//img")[0].attrib['src']
+
+    return ret
 
 
 def scrape_people():
@@ -27,11 +35,12 @@ def scrape_people():
             ".//a[contains(@href, 'councillors') and (text()!='')]"
         ]]
         role = person.xpath(".//br")[0].tail.strip()
-        image = image.attrib['src']
+        image = image.attrib['src']  # Fallback if we don't get one from the
+        # homepage.
         homepage = name.attrib['href']
         name = name.text
-        print role, image, homepage, name
-
+        info = scrape_page(homepage)
+        print info
 
 
 if __name__ == "__main__":
