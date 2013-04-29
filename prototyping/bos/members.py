@@ -40,8 +40,17 @@ def scrape_people():
         homepage = name.attrib['href']
         name = name.text
         info = scrape_page(homepage)
-        print info
+        if info.get('image', None):
+            image = info['image']
 
+        # p = Legislator(name,
+        #                district=role,
+        #                image=image,
+        #                bio=info['bio']
+        #                homepage=homepage)
+        # [implicit membership to council]
+        # yield p
+        print name, homepage
 
 if __name__ == "__main__":
     scrape_people()
