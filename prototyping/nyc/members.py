@@ -57,9 +57,28 @@ def committees():
             yield ret
 
 
+def scrape_committee_homepage(url):
+    ret = {"people": []}
+    page = lxmlize(url)
+    people = page.xpath("//td[@class='inside_sub_feature']//p")
+    if len(people) != 3:
+        print "EMPTY COMMITTEE: ", url
+        return ret
+
+    people = people[1]
+    ret['people'] = people.text_content().split("\n")
+    return ret
+
+
 def scrape_committees():
     for committee in committees():
-        print committee
+        name, url = [committee[x] for x in ["name", "url"]]
+        info = scrape_committee_homepage(url)
+        for person in info['people']:
+            print "  %s" % (person)
+        # c = Committee(name=name,
+        #               homepage=url)
+        # c.add_member(x) for x in info['people']
 
 
 def scrape_people():
