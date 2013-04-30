@@ -1,6 +1,12 @@
 from util import lxmlize
+import urllib
+import re
+
 
 MEMBER_PAGE = "http://council.nyc.gov/html/members/members.shtml"
+COMMITTEE_BASE = "http://council.nyc.gov/includes/scripts"
+COMMITTEE_PAGE = "{COMMITTEE_BASE}/nav_nodes.js".format(**locals())
+JS_PATTERN = re.compile(r"\s+\['(?P<name>.*)','(?P<url>.*)',\],")
 
 
 def scrape_homepage(homepage):
@@ -24,6 +30,38 @@ def scrape_homepage(homepage):
     return ret
 
 
+def committees():
+    page = urllib.urlopen(COMMITTEE_PAGE).read()
+    active = False
+    for line in page.splitlines():
+        if "['Committees','" in line:
+            active = True
+            continue
+        if active and not line.endswith("',],"):
+            active = False
+            continue
+
+        if active:
+            line = JS_PATTERN.match(line)
+            if line is None:
+                continue
+
+            ret = line.groupdict()
+            encoding_lame_bits = {
+                "\\'": "'"
+            }
+            for k, v in encoding_lame_bits.items():
+                ret['name'] = ret['name'].replace(k, v)
+
+            ret['url'] = "%s/%s" % (COMMITTEE_BASE, ret['url'])
+            yield ret
+
+
+def scrape_committees():
+    for committee in committees():
+        print committee
+
+
 def scrape_people():
     page = lxmlize(MEMBER_PAGE)
     for entry in page.xpath("//table[@id='members_table']//tr"):
@@ -44,4 +82,5 @@ def scrape_people():
 
 
 if __name__ == "__main__":
-    scrape_people()
+    #scrape_people()
+    scrape_committees()
