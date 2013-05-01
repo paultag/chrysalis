@@ -191,5 +191,7 @@ class BostonPersonScraper(Scraper):
             email = info.get('email', None)
             if email:
                 email = email[0]
-                committee.add_contact_detail(email, 'committee email', 'email')
+                committee.add_contact_detail(type='email',
+                                             value=email,
+                                             note='committee email')
             yield committee
