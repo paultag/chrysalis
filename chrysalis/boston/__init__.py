@@ -171,7 +171,7 @@ class BostonPersonScraper(Scraper):
                 continue
             name = c.text
             info = self.scrape_committee_page(c.attrib['href'])
-            committee = Organization(name)
+            committee = Organization(name, classification='committee')
             for member in info['members']:
                 #committee.add_member(member, role='member')
                 pass
