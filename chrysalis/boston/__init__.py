@@ -55,7 +55,6 @@ class Legislator(Person):
         self._related.append(org)
 
 
-
 class BostonPersonScraper(Scraper):
 
     def lxmlize(self, url):
@@ -65,10 +64,8 @@ class BostonPersonScraper(Scraper):
         return page
 
     def get_people(self):
-        for c in self.bos_scrape_committees():
-            yield c
-        for p in self.bos_scrape_people():
-            yield p
+        yield self.bos_scrape_committees()
+        yield self.bos_scrape_people()
 
     def get_one(self, page, expr):
         ret = page.xpath(expr)
@@ -115,7 +112,6 @@ class BostonPersonScraper(Scraper):
             p.add_source(MEMBER_LIST)
             yield p
 
-
     def scrape_committee_page(self, href):
         page = self.lxmlize(href)
         main = self.get_one(page, "//div[@class='content_main_sub']")
@@ -161,7 +157,6 @@ class BostonPersonScraper(Scraper):
 
         return ret
 
-
     def bos_scrape_committees(self):
         page = self.lxmlize(COMMITTEE_LIST)
         committees = page.xpath(
@@ -173,7 +168,7 @@ class BostonPersonScraper(Scraper):
             info = self.scrape_committee_page(c.attrib['href'])
             committee = Organization(name, classification='committee')
             for member in info['members']:
-                #committee.add_member(member, role='member')
+                #committee.add_membership(member, role='member')
                 pass
 
             chair = info.get('chair', None)
