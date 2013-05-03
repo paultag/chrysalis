@@ -2,6 +2,7 @@ from util import lxmlize
 import urllib2
 import urllib
 import lxml
+import time
 
 
 DURL = "http://www.cityofboston.gov/cityclerk/rollcall/default.aspx"
@@ -12,7 +13,10 @@ def do_post_back(form, event_target, event_argument):
                 for obj in form.xpath(".//input")]}
     block['__EVENTTARGET'] = event_target
     block['__EVENTARGUMENT'] = event_argument
-    print block['ctl00$MainContent$lblCurrentText']
+    block['ctl00$MainContent$lblCurrentText'] = (
+        int(block['ctl00$MainContent$lblCurrentText']) + 1)
+    print "PAGE", block['ctl00$MainContent$lblCurrentText']
+
     data = urllib.urlencode(block)
     ret = lxml.html.fromstring(urllib2.urlopen(form.action, data).read())
 
@@ -29,8 +33,13 @@ def iterpages():
 
 
 def next_page(page):
+    time.sleep(4)
     form = page.xpath("//form[@name='aspnetForm']")[0]
-    return do_post_back(form, 'ctl00$MainContent$lnkNext', '')
+    n = page.xpath("//a[contains(text(), 'Next Page')]")[0]
+    nextable = n.attrib['style'] != 'display: none;'
+    if nextable:
+        return do_post_back(form, 'ctl00$MainContent$lnkNext', '')
+    return None
 
 
 for page in iterpages():
