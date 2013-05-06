@@ -53,3 +53,5 @@ for page in iterpages():
             vote = zip(vit, vit, vit)
             for who, entry, _ in vote:
                 print who.text, entry.text
+
+            print date, motion
