@@ -1,4 +1,5 @@
 from util import lxmlize
+import datetime as dt
 import urllib2
 import urllib
 import lxml
@@ -49,9 +50,16 @@ for page in iterpages():
         votes = subject.xpath(".//div[@style='width:150px; float:right;']")
 
         for date, motion, vote in zip(dates, motions, votes):
+            when = dt.datetime.strptime(date, "%m/%d/%Y")
+            # v = Vote(motion=motion,
+            #          when=when,
+            #          [docket stuff])
+            print date, motion
+            print when
+
             vit = iter(vote.xpath("./div"))
             vote = zip(vit, vit, vit)
             for who, entry, _ in vote:
+                #v.vote(who=who.text,
+                #       vote=entry.text)
                 print who.text, entry.text
-
-            print date, motion
