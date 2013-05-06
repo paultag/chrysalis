@@ -15,7 +15,6 @@ def do_post_back(form, event_target, event_argument):
     block['__EVENTARGUMENT'] = event_argument
     block['ctl00$MainContent$lblCurrentText'] = (
         int(block['ctl00$MainContent$lblCurrentText']) + 1)
-    print "PAGE", block['ctl00$MainContent$lblCurrentText']
 
     data = urllib.urlencode(block)
     ret = lxml.html.fromstring(urllib2.urlopen(form.action, data).read())
@@ -43,5 +42,14 @@ def next_page(page):
 
 
 for page in iterpages():
-    print [x.text_content() for x in
-           page.xpath("//div[@class='HeaderContent']")]
+    for subject in page.xpath('//div[@class="ContainerPanel"]'):
+        dates = subject.xpath(".//font[@color='#276598']/b/text()")
+        motions = [x.strip() for x in subject.xpath(
+            ".//div[@style='width:260px; float:left;']/text()")]
+        votes = subject.xpath(".//div[@style='width:150px; float:right;']")
+
+        for date, motion, vote in zip(dates, motions, votes):
+            vit = iter(vote.xpath("./div"))
+            vote = zip(vit, vit, vit)
+            for who, entry, _ in vote:
+                print who.text, entry.text
