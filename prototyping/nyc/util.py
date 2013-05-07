@@ -24,8 +24,8 @@ def post_back(form, **kwargs):
     return ret
 
 
-def do_post_back(form, event_target, event_argument):
-    block = {}
+def do_post_back(form, event_target, event_argument, **kwargs):
+    block = kwargs
     block['__EVENTTARGET'] = event_target
     block['__EVENTARGUMENT'] = event_argument
     return post_back(form, **block)
