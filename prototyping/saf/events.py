@@ -41,10 +41,7 @@ def scrape_events():
             places = el.xpath(".//place")
             time, ampm = when
 
-            if True not in [x in time for x in ["AM", "PM"]]:
-                time += " PM"
-
-            tbuf = " ".join([curdate, time])
+            tbuf = " ".join([curdate, time, ampm])
             obj = dt.datetime.strptime(tbuf, "%B %m %Y %I:%M %p")
             print obj
 
