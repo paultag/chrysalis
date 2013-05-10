@@ -1,3 +1,4 @@
+# ~*~ encoding: utf-8 ~*~
 from sh import pdftotext
 import datetime as dt
 import urllib2
@@ -64,19 +65,26 @@ def handle_buffer(buf):
 
     tbuf = "%s %s %s" % (month, day, year)
     fmt = "%B %d %Y"
-    replace = {
-        "Noon": "PM"
-    }
+
+    dt_replace = {"Noon": "PM"}
+    et_replace = [["–", "-"],
+                  [r"^\s+\-\s+", ""]]
 
     if not all_day:
         tbuf += " %s" % (time)
         fmt += " %I:%M %p"
 
-    for k, v in replace.items():
+    for k, v in dt_replace.items():
         tbuf = tbuf.replace(k, v)
 
+    for k, v in et_replace:
+        buf = re.sub(k, v, buf)
+
+    buf = buf.strip()
+
     obj = dt.datetime.strptime(tbuf, fmt)
-    print obj, buf
+    print obj
+    print buf
 
 
 def parse_file(fd):
