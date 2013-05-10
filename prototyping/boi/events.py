@@ -1,4 +1,5 @@
 from sh import pdftotext
+import datetime as dt
 import urllib2
 import os
 import re
@@ -60,7 +61,22 @@ def handle_buffer(buf):
     time = time[0] if time else None
 
     all_day = time is None
-    print time, all_day
+
+    tbuf = "%s %s %s" % (month, day, year)
+    fmt = "%B %d %Y"
+    replace = {
+        "Noon": "PM"
+    }
+
+    if not all_day:
+        tbuf += " %s" % (time)
+        fmt += " %I:%M %p"
+
+    for k, v in replace.items():
+        tbuf = tbuf.replace(k, v)
+
+    obj = dt.datetime.strptime(tbuf, fmt)
+    print obj, buf
 
 
 def parse_file(fd):
