@@ -2,39 +2,51 @@ from util import lxmlize
 import datetime as dt
 import re
 
-CAL_PAGE = "http://www.santafenm.gov/currentevents.aspx"
+CAL_PAGE = "http://www.santafenm.gov/index.aspx?NID=1066"
+DT = re.compile(r"(?P<time>\d{1,2}:\d{1,2}) (?P<ampm>AM|PM)")
+WHEN = re.compile(r"DAY,\s+(?P<month>\w+)\s+(?P<dom>\d{1,2}),\s+(?P<year>\d{4})")
 
 
-def scrape_event(href):
-    page = lxmlize(href.attrib['href'])
-    tab = page.xpath("//table[@class='detail_content']")
-    tab = tab[0] if tab else None
-    if tab is None:
-        return
-
-    trs = tab.xpath("./tr")
-    ret = {}
-    for tr in trs:
-        key, value = tr.xpath("./*")
-        key = key.text.strip()
-        value = re.sub(r"\s+", " ", value.text_content()).strip()
-        ret[key] = value
-
-    day = ret['Date:']
-    fmt = "%B %d, %Y %I:%M %p"
-    start, end = [dt.datetime.strptime("%s %s" % (day, x), fmt)
-                  for x in [ret['Start Time:'], ret['End Time:']]]
-    title = ret['Title:']
-    descr = ret['Description:']
-    location = ret['Address:']
-    print start, title, end
+def cleanup(what):
+    return re.sub("\s+", " ", what).strip()
 
 
 def scrape_events():
+    curdate = None
     page = lxmlize(CAL_PAGE)
-    for a in page.xpath("//a[contains(@href, 'CurrentEvents') "
-                        "and (text()='More Information')]"):
-        scrape_event(a)
+    for el in page.xpath("//div[@id='Section1']/*"):
+        if el.tag[0] == 'h':
+            when = WHEN.findall(el.text_content())
+            when = when[0] if when else None
+            if when is None:
+                continue
+            curdate = " ".join(when)
+
+
+        if el.tag == 'p' and el.attrib['class'] == 'MsoNormal':
+
+            els = el.xpath("./*")
+            agenda = el.xpath(".//a[contains(@href, 'Archive.aspx')]")
+            agenda = agenda[0] if agenda else None
+            if agenda is None:
+                continue
+
+            info = el.text_content()
+            when = DT.findall(info)
+            when = when[0] if when else None
+            if when is None:
+                continue
+
+            people = el.xpath(".//personname")
+            places = el.xpath(".//place")
+            time, ampm = when
+
+            if True not in [x in time for x in ["AM", "PM"]]:
+                time += " PM"
+
+            tbuf = " ".join([curdate, time])
+            obj = dt.datetime.strptime(tbuf, "%B %m %Y %I:%M %p")
+            print obj
 
 
 if __name__ == "__main__":
