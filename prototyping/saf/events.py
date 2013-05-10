@@ -31,7 +31,7 @@ def scrape_events():
             if agenda is None:
                 continue
 
-            info = el.text_content()
+            info = cleanup(el.text_content())
             when = DT.findall(info)
             when = when[0] if when else None
             if when is None:
@@ -43,7 +43,7 @@ def scrape_events():
 
             tbuf = " ".join([curdate, time, ampm])
             obj = dt.datetime.strptime(tbuf, "%B %m %Y %I:%M %p")
-            print obj
+            print obj, info
 
 
 if __name__ == "__main__":
