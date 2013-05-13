@@ -1,4 +1,5 @@
 from util import lxmlize, do_post_back
+import datetime as dt
 import re
 
 
@@ -8,6 +9,7 @@ CAL_PAGE = ("http://www.cityoftemecula.org/Temecula/Visitors/Calendar.htm")
 def cleanup(foo):
     foo = re.sub("\s+", " ", foo).strip()
     return foo
+
 
 
 def scrape_events():
@@ -21,6 +23,14 @@ def scrape_events():
     })
     for event in scrape_event_page(page):
         print event
+
+
+def get_start_end(obj):
+    date = obj['Date:']
+    times = obj['time']
+    start, end = ("%s %s" % (date, times[time]) for time in times)
+    return (dt.datetime.strptime(x, "%A, %B %d, %Y %I:%M %p")
+            for x in (start, end))
 
 
 def scrape_event_page(page):
@@ -56,6 +66,8 @@ def scrape_event_page(page):
             continue
 
         ret['title'] = title
+        start, end = get_start_end(ret)
+        ret['time']['start'], ret['time']['end'] = start, end
         yield ret
 
 
