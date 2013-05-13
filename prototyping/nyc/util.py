@@ -13,7 +13,7 @@ def lxmlize(url):
 
 
 def post_back(form, **kwargs):
-    block = {name: value for name, value in [(obj.name, obj.value)
+    block = {name: value for name, value in [(obj.name, obj.value or '')
                 for obj in form.xpath(".//input")]}
     block.update(kwargs)
 
